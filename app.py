@@ -9,27 +9,28 @@ from model.User import User
 from flask_mongoengine import MongoEngine
 from routes.tweet_generator import generator
 from routes.user import user
-import config as config
 from helper import auth_tool
+import os
+
 
 
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = config.app_secret['key']
+app.config['SECRET_KEY'] = os.environ.get("APP_SECRET_KEY")
 
 twitter_blueprint = make_twitter_blueprint(
-    api_key=config.twitter_api['key'], 
-    api_secret=config.twitter_api['secret'])
+    api_key=os.environ.get("TWITTER_OAUTH_CLIENT_SECRET"), 
+    api_secret=os.environ.get("TWITTER_OAUTH_CLIENT_SECRET")
 
-openai.api_key = config.openai_api['key']
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 #DB
 app.config['MONGODB_SETTINGS'] = {
-    'db': config.mongodb_settings['db'],
-    'host': config.mongodb_settings['host'],
-    'port': config.mongodb_settings['port'],
-    'serverSelectionTimeoutMS':config.mongodb_settings['serverSelectionTimeoutMS']
+    'db': os.environ.get("DB_NAME"),
+    'host': os.environ.get("DB_HOST"),
+    'port': os.environ.get("DB_PORT"),
+    'serverSelectionTimeoutMS':os.environ.get("DB_TIMEOUT")
 }
 #CORS
 app.config['CORS_HEADERS'] = 'Content-Type'
@@ -85,7 +86,7 @@ def twitter_logged_in(blueprint, token):
 
 def build_response(user_name):
     jwt = auth_tool.create_payload(user_name)
-    resp = make_response(redirect(config.app_settings['local_fe_url'] + '/tweet'))
+    resp = make_response(redirect(os.environ.get("LOCAL_FE_URL") + '/tweet'))
     resp.set_cookie('Bearer', value =  jwt, httponly = False, samesite='None', secure=True)
     return resp
 
@@ -103,7 +104,7 @@ def build_response(user_name):
 
 @app.route('/logout') 
 def logout():
-    resp = make_response(redirect(config.app_settings['local_fe_url'] + '/'))
+    resp = make_response(redirect(os.environ.get("LOCAL_FE_URL") + '/'))
     resp.set_cookie('Bearer', '', expires=0)
     return resp 
 
@@ -144,7 +145,7 @@ def twitter_login():
         ##TODO check if user is subscribed, if not don't login, send them to payment page
         
         jwt = auth_tool.create_payload(user_name)
-        resp = make_response(redirect(config.app_settings['local_fe_url'] + '/tweet'))
+        resp = make_response(redirect(os.environ.get("LOCAL_FE_URL") + '/tweet'))
         resp.set_cookie('Bearer', value =  jwt, httponly = False, samesite='None', secure=True)
 
         return resp

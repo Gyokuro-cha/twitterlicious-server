@@ -1,12 +1,13 @@
 import openai
 from flask import request, jsonify, Blueprint
-import config as config
 from helper import auth_tool
+import os
+
 
 
 generator = Blueprint('generator', __name__)
 
-openai.api_key = config.openai_api['key']
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 
 def generate_tweet_by_prompt(prompt):

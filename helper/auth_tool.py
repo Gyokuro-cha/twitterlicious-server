@@ -1,7 +1,8 @@
 import jwt
 from datetime import datetime, timedelta
-import config as config
 from model.User import User
+import os
+
 
 
 def create_payload(user_name):
@@ -16,14 +17,14 @@ def create_jwt(user):
         'user_name': user.username,
         'has_training_model': user.hasTrainingModel,
         'plan': user.plan,
-        'exp': datetime.utcnow() + timedelta(hours=config.app_settings['jwt_expires_in'])
+        'exp': datetime.utcnow() + timedelta(hours=os.environ.get("JWT_EXPIRES_IN"))
     }
     return jwt.encode(
         payload,
-        config.app_secret['key'],
+        os.environ.get("APP_SECRET_KEY"),
         algorithm='HS256'
     )  
 
 def decode_jwt(jwt_token):
-    payload = jwt.decode(jwt_token, config.app_secret['key'], algorithms=['HS256'])
+    payload = jwt.decode(jwt_token, os.environ.get("APP_SECRET_KEY"), algorithms=['HS256'])
     return payload    

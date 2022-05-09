@@ -1,12 +1,12 @@
 import openai
 from flask import request, jsonify, Blueprint
-import config as config
 from helper import auth_tool
+import os
 
 
 user = Blueprint('user', __name__)
 
-openai.api_key = config.openai_api['key']
+openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 @user.post('/profile')
 def get_user_profile():
